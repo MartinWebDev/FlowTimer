@@ -14,14 +14,19 @@ namespace FlowTimer {
 
             int tab = FlowTimer.MainForm.TabControl.SelectedIndex + 1;
 
+            if (tab == 1) AddKeybindSetting("Arm", FlowTimer.Settings.Arm);
             AddKeybindSetting("Start", FlowTimer.Settings.Start);
             AddKeybindSetting("Stop", FlowTimer.Settings.Stop);
+
             if(tab == 3) AddKeybindSetting("Play", FlowTimer.Settings.Play);
+
             if(tab == 2 || tab == 3) AddKeybindSetting("Undo", FlowTimer.Settings.Undo);
             if(tab == 1 || tab == 3) AddKeybindSetting("Up", FlowTimer.Settings.Up);
             if(tab == 1 || tab == 3) AddKeybindSetting("Down", FlowTimer.Settings.Down);
+
             if(tab == 2) AddKeybindSetting("+Frame", FlowTimer.Settings.AddFrame);
             if(tab == 2) AddKeybindSetting("-Frame", FlowTimer.Settings.SubFrame);
+
             if(tab == 3) AddKeybindSetting("+  (1)", FlowTimer.Settings.AddFrame);
             if(tab == 3) AddKeybindSetting("-   (1)", FlowTimer.Settings.SubFrame);
             if(tab == 3) AddKeybindSetting("+  (2)", FlowTimer.Settings.Add2);

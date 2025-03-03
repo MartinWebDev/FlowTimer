@@ -30,6 +30,8 @@ namespace FlowTimer {
         public static FixedOffsetTimer FixedOffset;
         public static VariableOffsetTimer VariableOffset;
         public static IGTTracking IGTTracking;
+        public static MetronomeTimer Metronome;
+
         public static BaseTimer CurrentTab {
             get { return TimerTabs[MainForm.TabControl.SelectedIndex]; }
         }
@@ -54,6 +56,8 @@ namespace FlowTimer {
         public static Proc KeyboardCallback;
         public static IntPtr KeyboardHook;
         private static int[] LastKeyEvent = new int[256];
+
+        public static bool Armed = false;
 
         public static void Init() {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
@@ -167,10 +171,16 @@ namespace FlowTimer {
                 Keys key = (Keys) Marshal.ReadInt32(lParam);
 
                 if(Settings.KeyMethod.IsActivatedByEvent(wParam) && wParam != LastKeyEvent[(int) key]) {
-                    if(Settings.Start.IsPressed(key)) {
+                    if(Settings.Start.IsPressed(key) && Armed) {
                         StartTimer();
+                        Armed = false;
                     } else if(Settings.Stop.IsPressed(key)) {
                         StopTimer(false);
+                    }
+
+                    if (Settings.Arm.IsPressed(key))
+                    {
+                        Armed = true;
                     }
 
                     CurrentTab.OnKeyEvent(key);
@@ -186,7 +196,8 @@ namespace FlowTimer {
             FixedOffset = new FixedOffsetTimer(fixedOffset, copyControls);
             VariableOffset = new VariableOffsetTimer(variableOffset, copyControls);
             IGTTracking = new IGTTracking(TabPageIGTTracking, copyControls);
-            TimerTabs = new List<BaseTimer>() { FixedOffset, VariableOffset, IGTTracking };
+            Metronome = new MetronomeTimer(fixedOffset, copyControls);
+            TimerTabs = new List<BaseTimer>() { FixedOffset, VariableOffset, IGTTracking, Metronome };
         }
 
         public static void TabControl_Selected(object sender, TabControlEventArgs e) {
