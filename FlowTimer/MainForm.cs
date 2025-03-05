@@ -8,7 +8,7 @@ namespace FlowTimer {
         public MainForm() {
             InitializeComponent();
             FlowTimer.SetMainForm(this);
-            FlowTimer.RegisterTabs(TabPageFixedOffset, TabPageVariableOffset, TabPageIGTTracking);
+            FlowTimer.RegisterTabs(TabPageFixedOffset, TabPageVariableOffset, TabPageIGTTracking, tabMetronome);
             FlowTimer.Init();
         }
 

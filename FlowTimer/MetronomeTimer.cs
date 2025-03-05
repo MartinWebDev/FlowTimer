@@ -16,7 +16,8 @@ namespace FlowTimer
         public List<Timer> Timers;
         public Timer SelectedTimer;
 
-        public MetronomeTimer(TabPage tab, params Control[] copyControls) : base(tab, (start) => Math.Max((FlowTimer.MaxOffset - (Win32.GetTime() - start)) / 1000.0, 0.0), copyControls)
+        public MetronomeTimer(TabPage tab, params Control[] copyControls) :
+            base(tab, (start) => Math.Max((FlowTimer.MaxOffset - (Win32.GetTime() - start)) / 1000.0, 0.0), copyControls)
         {
             ButtonAdd = FlowTimer.MainForm.ButtonAdd;
             ButtonLoadTimers = FlowTimer.MainForm.ButtonLoadTimers;

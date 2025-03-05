@@ -603,12 +603,12 @@
             // 
             // tabMetronome
             // 
+            this.tabMetronome.BackColor = System.Drawing.SystemColors.Control;
             this.tabMetronome.Location = new System.Drawing.Point(8, 39);
             this.tabMetronome.Name = "tabMetronome";
             this.tabMetronome.Size = new System.Drawing.Size(1056, 434);
             this.tabMetronome.TabIndex = 3;
             this.tabMetronome.Text = "Metronome Timer";
-            this.tabMetronome.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 

@@ -112,6 +112,14 @@ namespace FlowTimer {
             return (Primary.Key == key || Secondary.Key == key) && (Form.ActiveForm == FlowTimer.MainForm || Global);
         }
 
+        public bool IsSet
+        {
+            get
+            {
+                return Primary.Key != Keys.None || Secondary.Key != Keys.None;
+            }
+        }
+
         private void CheckBoxGlobal_CheckChanged(object sender, EventArgs args) {
             Global = _CheckBoxGlobal.Checked;
         }

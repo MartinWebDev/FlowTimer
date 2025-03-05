@@ -14,7 +14,7 @@ namespace FlowTimer {
 
             int tab = FlowTimer.MainForm.TabControl.SelectedIndex + 1;
 
-            if (tab == 1) AddKeybindSetting("Arm", FlowTimer.Settings.Arm);
+            if (tab == 1 || tab == 4) AddKeybindSetting("Arm", FlowTimer.Settings.Arm);
             AddKeybindSetting("Start", FlowTimer.Settings.Start);
             AddKeybindSetting("Stop", FlowTimer.Settings.Stop);
 

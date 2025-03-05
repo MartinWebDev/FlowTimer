@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using static FlowTimer.Win32;
 using static FlowTimer.SDL;
+using System.Windows.Input;
 
 namespace FlowTimer {
 
@@ -94,7 +95,7 @@ namespace FlowTimer {
             MainForm.ButtonLoadTimers.DisableSelect();
             MainForm.ButtonSaveTimers.DisableSelect();
 
-            KeyboardCallback = Keycallback;
+            KeyboardCallback = KeyCallback;
             KeyboardHook = SetHook(WH_KEYBOARD_LL, KeyboardCallback);
 
             foreach(BaseTimer timer in TimerTabs) {
@@ -132,8 +133,8 @@ namespace FlowTimer {
             MainFormBaseHeight = mainForm.Height;
             MainForm.RemoveKeyControls();
 
-            int buildVersion = Assembly.GetExecutingAssembly().GetName().Version.Major;
-            MainForm.Text += " (Build " + buildVersion + ")";
+            var buildVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            MainForm.Text += string.Format(" (Build {0}.{1}.{2}.{3})", buildVersion.Major, buildVersion.Minor, buildVersion.Revision, buildVersion.Build);
         }
 
         public static void RemoveKeyControls(this Control control) {
@@ -166,12 +167,17 @@ namespace FlowTimer {
             }
         }
 
-        private static IntPtr Keycallback(int nCode, int wParam, IntPtr lParam) {
+        private static bool ShouldStartTimer(Keys key)
+        {
+            return Settings.Start.IsPressed(key) && (Settings.Arm.IsSet || Armed);
+        }
+
+        private static IntPtr KeyCallback(int nCode, int wParam, IntPtr lParam) {
             if((SettingsForm == null || !SettingsForm.Visible) && nCode >= 0) {
                 Keys key = (Keys) Marshal.ReadInt32(lParam);
 
                 if(Settings.KeyMethod.IsActivatedByEvent(wParam) && wParam != LastKeyEvent[(int) key]) {
-                    if(Settings.Start.IsPressed(key) && Armed) {
+                    if(ShouldStartTimer(key)) {
                         StartTimer();
                         Armed = false;
                     } else if(Settings.Stop.IsPressed(key)) {
@@ -191,12 +197,12 @@ namespace FlowTimer {
             return CallNextHookEx(KeyboardHook, nCode, wParam, lParam);
         }
 
-        public static void RegisterTabs(TabPage fixedOffset, TabPage variableOffset, TabPage TabPageIGTTracking) {
+        public static void RegisterTabs(TabPage fixedOffset, TabPage variableOffset, TabPage TabPageIGTTracking, TabPage tabMetronome) {
             Control[] copyControls = { MainForm.ButtonStart, MainForm.ButtonStop, MainForm.ButtonSettings, MainForm.LabelTimer, MainForm.PictureBoxPin };
             FixedOffset = new FixedOffsetTimer(fixedOffset, copyControls);
             VariableOffset = new VariableOffsetTimer(variableOffset, copyControls);
             IGTTracking = new IGTTracking(TabPageIGTTracking, copyControls);
-            Metronome = new MetronomeTimer(fixedOffset, copyControls);
+            Metronome = new MetronomeTimer(tabMetronome, copyControls);
             TimerTabs = new List<BaseTimer>() { FixedOffset, VariableOffset, IGTTracking, Metronome };
         }
 
@@ -363,7 +369,7 @@ namespace FlowTimer {
 
             File.Copy(filePath, Beeps + fileName);
             if(SettingsForm != null) SettingsForm.ComboBoxBeep.Items.Add(fileNameWithoutExtension);
-            MessageBox.Show("Beep sucessfully imported from '" + filePath + "'.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Beep successfully imported from '" + filePath + "'.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return true;
         }
 
