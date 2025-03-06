@@ -17,3 +17,6 @@ Direct Download: https://gunnermaniac.com/ft
     - eg: `3 % 3 == 0 => click`
 - Global hotkey to "arm" timer. So can bind timer start key to in game control for perfect starts every time.
 - Save settings and automatically recall them at next open.
+- Lint entire application and bring it up to C# design standards and best practices
+  - Address various spacing issues
+  - Ensure zero index checking of things such as tabs (better still, use an enum)

@@ -40,6 +40,18 @@ namespace FlowTimer {
             if(tab == 3) AddKeybindSetting("+  (6)", FlowTimer.Settings.Add6);
             if(tab == 3) AddKeybindSetting("-   (6)", FlowTimer.Settings.Sub6);
 
+            // Disable option to choose beep if using metronome for now
+            if (tab == 4)
+            {
+                ComboBoxBeep.Enabled = false;
+                ButtonImportBeep.Enabled = false;
+            }
+            else
+            {
+                ComboBoxBeep.Enabled = true;
+                ButtonImportBeep.Enabled = true;
+            }
+
             LabelBeep.Top = SizeKeybinds + 14;
             ComboBoxBeep.Top = SizeKeybinds + 10;
             ButtonImportBeep.Top = SizeKeybinds + 9;
