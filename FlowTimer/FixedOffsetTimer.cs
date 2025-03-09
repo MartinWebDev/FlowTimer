@@ -18,7 +18,9 @@ namespace FlowTimer {
         public List<Timer> Timers;
         public Timer SelectedTimer;
 
-        public FixedOffsetTimer(TabPage tab, params Control[] copyControls) : base(tab, (start) => Math.Max((FlowTimer.MaxOffset - (Win32.GetTime() - start)) / 1000.0, 0.0), copyControls) {
+        public FixedOffsetTimer(TabPage tab, params Control[] copyControls) :
+            base(tab, (start) => Math.Max((FlowTimer.MaxOffset - (Win32.GetTime() - start)) / 1000.0, 0.0), copyControls)
+        {
             ButtonAdd = FlowTimer.MainForm.ButtonAdd;
             ButtonLoadTimers = FlowTimer.MainForm.ButtonLoadTimers;
             ButtonSaveTimers = FlowTimer.MainForm.ButtonSaveTimers;
@@ -270,16 +272,16 @@ namespace FlowTimer {
         }
     }
 
-    public class TimerInfo {
-
+    public class TimerInfo
+    {
         public uint[] Offsets;
         public uint MaxOffset;
         public uint Interval;
         public uint NumBeeps;
     }
 
-    public class Timer {
-
+    public class Timer
+    {
         public const int X = 165;
         public const int Y = 31;
         public const int Size = 28;

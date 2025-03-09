@@ -30,6 +30,7 @@ namespace FlowTimer {
         public string Beep = "ping1";
         public bool Pinned = false;
         public string LastLoadedTimers = null;
+        public string LastLoadedMetronomes = null;
         public string LastLoadedIGTTimers = null;
         public bool AutoUpdate = false;
         public int Volume = 100;

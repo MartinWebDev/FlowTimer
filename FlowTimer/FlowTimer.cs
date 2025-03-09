@@ -13,10 +13,10 @@ using static FlowTimer.Win32;
 using static FlowTimer.SDL;
 using System.Windows.Input;
 
-namespace FlowTimer {
-
-    public static class FlowTimer {
-
+namespace FlowTimer
+{
+    public static class FlowTimer
+    {
         public const string TimerFileFilter = "Json files (*.json)|*.json";
         public const string BeepFileFilter = "WAV files (*.wav)|*.wav";
 
@@ -33,7 +33,8 @@ namespace FlowTimer {
         public static IGTTracking IGTTracking;
         public static MetronomeTimer Metronome;
 
-        public static BaseTimer CurrentTab {
+        public static BaseTimer CurrentTab
+        {
             get { return TimerTabs[MainForm.TabControl.SelectedIndex]; }
         }
 
@@ -45,6 +46,7 @@ namespace FlowTimer {
         public static SpriteSheet PinSheet;
 
         public static AudioContext AudioContext;
+        // TODO Metronome: Change FlowTimer class to allow multiple beep sounds
         public static byte[] BeepSound;
         public static byte[] BeepSoundUnadjusted;
         public static byte[] PCM;
@@ -60,20 +62,25 @@ namespace FlowTimer {
 
         public static bool Armed = false;
 
-        public static void Init() {
+        public static void Init()
+        {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
             Win32.InitTiming();
 
-            if(File.Exists(SettingsFile)) {
-                try {
+            if (File.Exists(SettingsFile))
+            {
+                try
+                {
                     Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsFile));
-                } catch(Exception e) {
-                    MessageBox.Show("The settings could not be loaded and have been reset to their default values.\n" + e.Source + ": " + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex) {
+                    MessageBox.Show("The settings could not be loaded and have been reset to their default values.\n" + ex.Source + ": " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
-            if(Settings == null) {
+            if (Settings == null)
+            {
                 Settings = new Settings();
             }
 
@@ -104,15 +111,26 @@ namespace FlowTimer {
         }
 
         public static void Destroy() {
-            if(FixedOffset.HaveTimersChanged()) {
-                if(MessageBox.Show("[Fixed Offset] You've changed your timers without saving. Would you like to save your timers?", "Save timers?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
+            if (FixedOffset.HaveTimersChanged())
+            {
+                if (MessageBox.Show("[Fixed Offset] You've changed your timers without saving. Would you like to save your timers?", "Save timers?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
                     FixedOffset.SaveTimers(Settings.LastLoadedTimers, true);
                 }
             }
             IGTTracking.SaveDelayersFile();
-            if(IGTTracking.HaveTimersChanged()) {
-                if(MessageBox.Show("[IGT Tracking] You've changed your timers without saving. Would you like to save your timers?", "Save timers?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
+            if (IGTTracking.HaveTimersChanged())
+            {
+                if (MessageBox.Show("[IGT Tracking] You've changed your timers without saving. Would you like to save your timers?", "Save timers?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
                     IGTTracking.SaveTimers(Settings.LastLoadedIGTTimers, true);
+                }
+            }
+            if (Metronome.HaveTimersChanged())
+            {
+                if (MessageBox.Show("[Metronome] You've changed your timers without saving. Would you like to save your timers?", "Save timers?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    Metronome.SaveTimers(Settings.LastLoadedMetronomes, true);
                 }
             }
 
@@ -134,7 +152,7 @@ namespace FlowTimer {
             MainForm.RemoveKeyControls();
 
             var buildVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            MainForm.Text += string.Format(" (Build {0}.{1}.{2}.{3})", buildVersion.Major, buildVersion.Minor, buildVersion.Revision, buildVersion.Build);
+            MainForm.Text += string.Format(" (Build {0}.{1}.{2}.{3})", buildVersion.Major, buildVersion.Minor, buildVersion.Build, buildVersion.Revision);
         }
 
         public static void RemoveKeyControls(this Control control) {
@@ -177,16 +195,22 @@ namespace FlowTimer {
                 Keys key = (Keys) Marshal.ReadInt32(lParam);
 
                 if(Settings.KeyMethod.IsActivatedByEvent(wParam) && wParam != LastKeyEvent[(int) key]) {
-                    if(ShouldStartTimer(key)) {
+                    if(ShouldStartTimer(key))
+                    {
                         StartTimer();
-                        Armed = false;
-                    } else if(Settings.Stop.IsPressed(key)) {
+                    }
+                    else if(Settings.Stop.IsPressed(key)) {
                         StopTimer(false);
                     }
 
                     if (Settings.Arm.IsPressed(key))
                     {
                         Armed = true;
+                        // Give some sort of "arm" feedback
+                        if (Settings.Arm.IsSet)
+                        {
+                            MainForm.LabelTimer.ForeColor = Color.Red;
+                        }
                     }
 
                     CurrentTab.OnKeyEvent(key);
@@ -288,6 +312,10 @@ namespace FlowTimer {
             TimerUpdateThread = new Thread(TimerUpdateCallback);
             TimerUpdateThread.Start();
             CurrentTab.OnVisualTimerStart();
+
+            // Reset arm value if used
+            Armed = false;
+            MainForm.LabelTimer.ForeColor = Color.Black;
         }
 
         public static void StopTimer(bool timerExpired) {
