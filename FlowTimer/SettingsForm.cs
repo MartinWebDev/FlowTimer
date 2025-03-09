@@ -154,7 +154,8 @@ namespace FlowTimer {
             if((Win32.GetKeyState(Keys.LButton) & 0x80) == 0) {
                 if(TextBoxVolume.Text != "") TextBoxVolume.Text = TrackBarVolume.Value.ToString();
                 FlowTimer.AdjustBeepSoundVolume(TrackBarVolume.Value);
-                FlowTimer.AudioContext.QueueAudio(FlowTimer.BeepSound);
+                // TODO: If implementing custom metronomes, do something here
+                FlowTimer.AudioContext.QueueAudio(FlowTimer.BeepSounds[0]);
                 FlowTimer.Settings.Volume = TrackBarVolume.Value;
             }
         }

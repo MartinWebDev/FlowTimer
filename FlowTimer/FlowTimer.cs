@@ -47,8 +47,9 @@ namespace FlowTimer
 
         public static AudioContext AudioContext;
         // TODO Metronome: Change FlowTimer class to allow multiple beep sounds
-        public static byte[] BeepSound;
-        public static byte[] BeepSoundUnadjusted;
+        public static List<byte[]> BeepSounds;
+        public static List<byte[]> BeepSoundsUnadjusted;
+        public static int[] BeepOrder; // EG: 4/4 = 0,1,1,1 or 3/4 = 0,1,1
         public static byte[] PCM;
         public static double MaxOffset;
 
@@ -281,12 +282,15 @@ namespace FlowTimer
             if(garbageCollect) GC.Collect();
             double maxOffset = offsets.Max();
 
-            PCM = new byte[((int) Math.Ceiling(maxOffset / 1000.0 * AudioContext.SampleRate)) * AudioContext.NumChannels * AudioContext.BytesPerSample + BeepSound.Length];
+            // TODO: For now, we are forcing the beeps for metronome, so we can assume first beep for this line. Later though, change it.
+            PCM = new byte[((int) Math.Ceiling(maxOffset / 1000.0 * AudioContext.SampleRate)) * AudioContext.NumChannels * AudioContext.BytesPerSample + BeepSounds[0].Length];
 
             foreach(double offset in offsets) {
                 for(int i = 0; i < numBeeps; i++) {
                     int destOffset = (int) ((offset - i * interval) / 1000.0 * AudioContext.SampleRate) * AudioContext.NumChannels * 2;
-                    Array.Copy(BeepSound, 0, PCM, destOffset, BeepSound.Length);
+                    int nextBeepIndex = BeepOrder[i % BeepOrder.Length];
+                    byte[] nextBeep = BeepSounds[nextBeepIndex];
+                    Array.Copy(nextBeep, 0, PCM, destOffset, nextBeep.Length);
                 }
             }
         }
@@ -404,33 +408,74 @@ namespace FlowTimer
         public static void ChangeBeepSound(string beepName, bool playSound = true) {
             if(AudioContext != null) AudioContext.Destroy();
 
+            // TODO, another place we can assume a specific beep for metronomes, but if we want custom beeps this will need to change.
+            BeepSounds = new List<byte[]>();
+            BeepOrder = new int[1] { 0 };
+            byte[] beepSoundUnadjusted;
+
             SDL_AudioSpec audioSpec;
-            Wave.LoadWAV(Beeps + beepName + ".wav", out BeepSoundUnadjusted, out audioSpec);
+            Wave.LoadWAV(Beeps + beepName + ".wav", out beepSoundUnadjusted, out audioSpec);
             AudioContext = new AudioContext(audioSpec.freq, audioSpec.format, audioSpec.channels);
+
+            BeepSoundsUnadjusted = new List<byte[]>() { beepSoundUnadjusted };
+
             AdjustBeepSoundVolume(Settings.Volume);
             CurrentTab.OnBeepSoundChange();
             Settings.Beep = beepName;
 
             if(playSound) {
-                AudioContext.QueueAudio(BeepSound);
+                AudioContext.QueueAudio(BeepSounds[0]);
             }
+        }
+
+        public static void ChangeBeepSound(List<string> beepNames, bool playSound = false)
+        {
+            if (AudioContext != null) AudioContext.Destroy();
+
+            string[] beepPaths = beepNames.ConvertAll(x => { return string.Format("{0}{1}.wav", Beeps, x); }).ToArray();
+
+            SDL_AudioSpec audioSpec;
+            Wave.LoadWAVs(beepPaths, out BeepSoundsUnadjusted, out audioSpec);
+            AudioContext = new AudioContext(audioSpec.freq, audioSpec.format, audioSpec.channels);
+
+            // TEMP force order for metronome testing
+            BeepOrder = new int[4] { 0, 1, 1, 1 };
+
+            AdjustBeepSoundVolume(Settings.Volume);
+            CurrentTab.OnBeepSoundChange();
+            //Settings.Beep = beepNames[0]; // Later, if allowing customisable metronomes
+
+            // For now, no implementation needed here for metronome
+            //if (playSound)
+            //{
+            //    AudioContext.QueueAudio(BeepSound);
+            //}
         }
 
         public static void AdjustBeepSoundVolume(int newVolume) {
             float vol = newVolume / 100.0f;
-            BeepSound = new byte[BeepSoundUnadjusted.Length];
-            for(int i = 0; i < BeepSound.Length; i += 2) {
-                short sample = (short) (BeepSoundUnadjusted[i] | (BeepSoundUnadjusted[i + 1] << 8));
-                float floatSample = sample;
+            BeepSounds = new List<byte[]>();
+            
+            for (int i = 0; i < BeepSoundsUnadjusted.Count; i++)
+            {
+                var BeepSound = new byte[BeepSoundsUnadjusted[i].Length];
+                
+                for (int j = 0; j < BeepSound.Length; j += 2)
+                {
+                    short sample = (short)(BeepSoundsUnadjusted[i][j] | (BeepSoundsUnadjusted[i][j + 1] << 8));
+                    float floatSample = sample;
 
-                floatSample *= vol;
+                    floatSample *= vol;
 
-                if(floatSample < short.MinValue) floatSample = short.MinValue;
-                if(floatSample > short.MaxValue) floatSample = short.MaxValue;
+                    if (floatSample < short.MinValue) floatSample = short.MinValue;
+                    if (floatSample > short.MaxValue) floatSample = short.MaxValue;
 
-                sample = (short) floatSample;
-                BeepSound[i] = (byte) (sample & 0xFF);
-                BeepSound[i + 1] = (byte) (sample >> 8);
+                    sample = (short)floatSample;
+                    BeepSound[j] = (byte)(sample & 0xFF);
+                    BeepSound[j + 1] = (byte)(sample >> 8);
+                }
+
+                BeepSounds.Add(BeepSound);
             }
 
             CurrentTab.OnBeepVolumeChange();

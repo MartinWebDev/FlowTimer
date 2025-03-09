@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 using static FlowTimer.SDL;
 
 namespace FlowTimer {
@@ -128,13 +130,13 @@ namespace FlowTimer {
             int pointer = 0;
 
             WaveHeader header = bytes.Consume<WaveHeader>(ref pointer);
-            if(header.RiffId != WaveId_RIFF) return false;
-            if(header.WaveId != WaveId_WAVE) return false;
+            if (header.RiffId != WaveId_RIFF) return false;
+            if (header.WaveId != WaveId_WAVE) return false;
 
-            while(pointer < bytes.Length) {
+            while (pointer < bytes.Length) {
                 WaveChunkHeader chunkHeader = bytes.Consume<WaveChunkHeader>(ref pointer);
 
-                if(chunkHeader.Id == WaveId_fmt) {
+                if (chunkHeader.Id == WaveId_fmt) {
                     WaveFmt fmt = bytes.ReadStruct<WaveFmt>(pointer);
                     spec = new SDL_AudioSpec() {
                         freq = (int) fmt.SampleRate,
@@ -152,7 +154,8 @@ namespace FlowTimer {
                             spec.format = AUDIO_S16LSB;
                         } break;
                     };
-                } else if(chunkHeader.Id == WaveId_data) {
+                }
+                else if (chunkHeader.Id == WaveId_data) {
                     pcm = bytes.Subarray(pointer, (int) chunkHeader.Size);
                 }
 
@@ -170,6 +173,26 @@ namespace FlowTimer {
                 spec.format = AUDIO_S16LSB;
             }
 
+            return true;
+        }
+
+        public static bool LoadWAVs(string[] beepPaths, out List<byte[]> pcm, out SDL_AudioSpec audioSpec)
+        {
+            pcm = new List<byte[]>();
+            List< SDL_AudioSpec> specs = new List< SDL_AudioSpec>();
+
+            for (int i = 0; i < beepPaths.Length; i++)
+            {
+                byte[] thisPcm;
+                SDL_AudioSpec thisSpec;
+
+                LoadWAV(beepPaths[i], out thisPcm, out thisSpec);
+
+                pcm.Add(thisPcm);
+                specs.Add(thisSpec);
+            }
+
+            audioSpec = specs[0];
             return true;
         }
     }

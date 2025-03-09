@@ -49,6 +49,7 @@ namespace FlowTimer
             base.OnLoad();
             RepositionAddButton();
             SelectMetronome(SelectedMetronome);
+            FlowTimer.ChangeBeepSound(new List<string>() { "ping2", "ping1" });
         }
 
         public override void OnTimerStart()
@@ -95,6 +96,7 @@ namespace FlowTimer
         public void RepositionAddButton()
         {
             ButtonAdd.SetBounds(Metronome.X, Metronome.Y + Metronome.Size * Metronomes.Count - 2, ButtonAdd.Bounds.Width, ButtonAdd.Bounds.Height);
+            // TODO Resize width to suit extra textbox
             FlowTimer.ResizeForm(FlowTimer.MainForm.Width, FlowTimer.MainFormBaseHeight + Math.Max(Metronomes.Count - 5, 0) * Metronome.Size);
         }
 

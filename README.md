@@ -1,4 +1,4 @@
-Direct Download: https://gunnermaniac.com/ft
+Downloads of thisd version available on Releases page
 
 # TODO
 - Update clicks to a 4/4 timer. First click different to other 3. EG: "Click clack clack clack, click clack clack clack, click"
