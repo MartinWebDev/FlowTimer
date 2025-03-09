@@ -459,19 +459,19 @@ namespace FlowTimer
 
             metronomeInfo = new MetronomeInfo();
 
-            if (!uint.TryParse(TextBoxBPM.Text, out bpm))
+            if (!uint.TryParse(TextBoxBPM.Text, out bpm) || bpm <= 0)
             {
                 // TODO: Add error for BPM
                 return TimerError.InvalidInterval;
             }
 
-            if (!uint.TryParse(TextBoxBeatsPerBar.Text, out beats))
+            if (!uint.TryParse(TextBoxBeatsPerBar.Text, out beats) || beats <= 0)
             {
                 // TODO: Add error for beats
                 return TimerError.InvalidNumBeeps;
             }
 
-            if (!uint.TryParse(TextBoxTotalBars.Text, out bars))
+            if (!uint.TryParse(TextBoxTotalBars.Text, out bars) || bars <= 0)
             {
                 // TODO: Add error for total bars
                 return TimerError.InvalidNumBeeps;
@@ -482,7 +482,7 @@ namespace FlowTimer
 
             for (int i = 0; i < offsetsStr.Length; i++)
             {
-                if (!uint.TryParse(offsetsStr[i], out offsets[i]))
+                if (!uint.TryParse(offsetsStr[i], out offsets[i]) || offsets[i] <= 0)
                 {
                     return TimerError.InvalidOffset;
                 }
