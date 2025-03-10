@@ -40,6 +40,7 @@ namespace FlowTimer {
             base.OnLoad();
             RepositionAddButton();
             SelectTimer(SelectedTimer);
+
         }
 
         public override void OnTimerStart() {
