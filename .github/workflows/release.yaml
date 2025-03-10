@@ -3,7 +3,7 @@ name: Build and Release WinForms App
 on:
   push:
     branches:
-      - master
+      - feature/github-action-release
 
 jobs:
   release:
