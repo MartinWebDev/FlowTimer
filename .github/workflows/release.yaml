@@ -14,10 +14,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 4.7.x
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet Packages
+        run: nuget restore FlowTimer.sln
 
       - name: Determine Next Version
         id: version
@@ -34,7 +38,7 @@ jobs:
         shell: pwsh
 
       - name: Build Solution
-        run: dotnet build --configuration Release
+        run: msbuild FlowTimer.sln /p:Configuration=Release /p:Platform="Any CPU"
 
       - name: Find Executable
         id: find_exe
