@@ -188,7 +188,7 @@ namespace FlowTimer
 
         private static bool ShouldStartTimer(Keys key)
         {
-            if (Settings.Arm.IsSet && Armed) return true;
+            if (Settings.Arm.IsSet && Armed && Settings.Start.IsPressed(key)) return true;
             if (!Settings.Arm.IsSet && Settings.Start.IsPressed(key)) return true;
             return false;
         }
